@@ -7,27 +7,34 @@
           <img src="/logo.svg" alt="趣聚平台" class="logo-icon" />
           <h1 class="brand-title">趣聚平台</h1>
         </div>
-        <p class="brand-subtitle">发现有趣活动，结识志趣相投的人</p>
+        <p class="brand-subtitle">管理后台 · 发现有趣活动，结识志趣相投的人</p>
         <div class="feature-list">
           <div class="feature-item">
             <span class="feature-icon">
               <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
             </span>
-            <span>创建与发布丰富多彩的线下活动</span>
+            <span>审核与发布丰富多彩的线下活动</span>
           </div>
           <div class="feature-item">
             <span class="feature-icon">
               <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
             </span>
-            <span>按兴趣探索附近精彩活动</span>
+            <span>管理用户与商家入驻申请</span>
           </div>
           <div class="feature-item">
             <span class="feature-icon">
               <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
             </span>
-            <span>构建兴趣小队，与同好一起成长</span>
+            <span>数据分析，掌控平台运营状态</span>
           </div>
         </div>
+      </div>
+
+      <!-- 装饰图形 -->
+      <div class="brand-decoration">
+        <div class="deco-circle deco-circle-1"></div>
+        <div class="deco-circle deco-circle-2"></div>
+        <div class="deco-circle deco-circle-3"></div>
       </div>
     </div>
 
@@ -35,8 +42,14 @@
     <div class="login-section">
       <div class="login-card">
         <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="32" height="32">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
           <h2 class="card-title">管理员登录</h2>
-          <p class="card-desc">欢迎回来，请登录管理后台</p>
+          <p class="card-desc">欢迎回来，请输入您的账户信息</p>
         </div>
 
         <el-form
@@ -70,15 +83,20 @@
           </el-form-item>
         </el-form>
 
-        <el-divider class="dev-divider">
-          <span class="dev-label">开发模式</span>
-        </el-divider>
+        <div class="divider-with-text">
+          <span class="divider-line"></span>
+          <span class="divider-text">快捷进入</span>
+          <span class="divider-line"></span>
+        </div>
 
         <el-button size="large" @click="handleDemoLogin" class="demo-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" style="margin-right: 6px;">
+            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+          </svg>
           演示模式 · 直接进入后台
         </el-button>
 
-        <p class="footer-note">仅管理员可登录，无注册入口</p>
+        <p class="footer-note">仅管理员可登录</p>
       </div>
     </div>
   </div>
@@ -135,98 +153,114 @@ function handleDemoLogin() {
 .login-page {
   display: flex;
   height: 100vh;
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 30%, #16213e 55%, #0f3460 100%);
+  background: var(--bg-page);
   position: relative;
   overflow: hidden;
 }
 
-/* 装饰光晕 */
-.login-page::before {
-  content: '';
-  position: absolute;
-  width: 700px;
-  height: 700px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(79, 172, 254, 0.07) 0%, transparent 70%);
-  top: -250px;
-  left: 30%;
-  transform: translateX(-50%);
-}
-
-.login-page::after {
-  content: '';
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 242, 195, 0.05) 0%, transparent 70%);
-  bottom: -150px;
-  right: 10%;
-}
-
 /* ===== 左侧品牌区 ===== */
 .brand-section {
-  flex: 1.3;
+  flex: 1.2;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  z-index: 1;
+  background: linear-gradient(160deg, oklch(0.88 0.08 220 / 0.15), oklch(0.95 0.03 210 / 0.08));
+  overflow: hidden;
 }
 
 .brand-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   padding: 60px;
-  max-width: 520px;
+  max-width: 480px;
 }
 
 .logo-wrapper {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 32px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .logo-icon {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
 }
 
 .brand-title {
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
 }
 
 .brand-subtitle {
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.65);
-  margin: 0 0 56px;
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 48px;
   line-height: 1.6;
 }
 
 .feature-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .feature-item {
   display: flex;
   align-items: center;
   gap: 14px;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 17px;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .feature-icon {
-  color: #b2ebf2;
+  color: var(--brand);
   display: flex;
   flex-shrink: 0;
+}
+
+/* === 装饰图形 === */
+.brand-decoration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.deco-circle-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, oklch(0.78 0.12 220 / 0.12) 0%, transparent 70%);
+  top: -120px;
+  right: -80px;
+}
+
+.deco-circle-2 {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, oklch(0.88 0.08 70 / 0.1) 0%, transparent 70%);
+  bottom: -60px;
+  left: -60px;
+}
+
+.deco-circle-3 {
+  width: 160px;
+  height: 160px;
+  border: 2px solid oklch(0.82 0.08 218 / 0.15);
+  top: 50%;
+  left: 60%;
+  transform: translate(-50%, -50%);
 }
 
 /* ===== 右侧登录区 ===== */
@@ -242,10 +276,11 @@ function handleDemoLogin() {
 
 .login-card {
   width: 380px;
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
-  padding: 36px 32px 28px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  padding: 40px 32px 32px;
 }
 
 .card-header {
@@ -253,65 +288,87 @@ function handleDemoLogin() {
   text-align: center;
 }
 
+.card-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  background: oklch(0.93 0.04 220 / 0.3);
+  color: var(--brand);
+  border-radius: 14px;
+}
+
 .card-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text-primary);
   margin: 0 0 6px;
 }
 
 .card-desc {
   font-size: 13px;
-  color: #909399;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .login-btn {
   width: 100%;
-  height: 42px;
-  font-size: 14px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #0f3460, #1a5276);
-  border: none;
+  height: 44px;
+  font-size: 15px;
+  border-radius: 10px;
+  letter-spacing: 2px;
 }
 
-.login-btn:hover {
-  background: linear-gradient(135deg, #1a5276, #2980b9);
-}
-
-.dev-divider {
+/* Divider */
+.divider-with-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 20px 0 14px;
 }
 
-.dev-label {
-  color: #bbb;
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-muted);
+}
+
+.divider-text {
+  flex-shrink: 0;
   font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .demo-btn {
   width: 100%;
-  height: 40px;
+  height: 42px;
   font-size: 13px;
-  border-radius: 8px;
-  border: 1px dashed #dcdfe6;
-  color: #909399;
-  background: #fafafa;
+  border-radius: 10px;
+  border: 1px dashed var(--border-light);
+  color: var(--text-secondary);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .demo-btn:hover {
-  border-color: #4fc3f7;
-  color: #4fc3f7;
-  background: #f0fbff;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
 }
 
 .footer-note {
   text-align: center;
-  color: #ccc;
+  color: var(--text-muted);
   font-size: 11px;
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
-/* ===== 响应式 ===== */
 @media (max-width: 768px) {
   .brand-section {
     display: none;

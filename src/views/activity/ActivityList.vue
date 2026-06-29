@@ -1,8 +1,16 @@
 <template>
-  <div>
-    <h2>活动管理</h2>
-    <el-card class="search-card">
-      <el-form :inline="true" :model="queryParams">
+  <div class="page-container">
+    <!-- 页头 -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">活动管理</h2>
+        <p class="page-desc">查看、下架或恢复平台活动</p>
+      </div>
+    </div>
+
+    <!-- 搜索 -->
+    <div class="search-card">
+      <el-form :inline="true" :model="queryParams" class="search-form">
         <el-form-item label="关键词">
           <el-input v-model="queryParams.q" placeholder="活动名称" clearable @clear="fetchList" />
         </el-form-item>
@@ -21,15 +29,16 @@
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
-    <el-card class="table-card">
+    <!-- 表格 -->
+    <div class="table-card">
       <el-table :data="list" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="200" show-overflow-tooltip />
         <el-table-column prop="title" label="活动名称" min-width="180" show-overflow-tooltip />
         <el-table-column label="状态" width="110">
           <template #default="{ row }">
-            <el-tag :type="statusMap[row.status]?.type" size="small">
+            <el-tag :type="statusMap[row.status]?.type" size="small" effect="plain" round>
               {{ statusMap[row.status]?.label || row.status }}
             </el-tag>
           </template>
@@ -69,13 +78,14 @@
           v-if="hasMore"
           :loading="loading"
           @click="loadMore"
+          round
         >加载更多</el-button>
         <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
       </div>
-    </el-card>
+    </div>
 
     <!-- 下架对话框 -->
-    <el-dialog v-model="dialog.visible" title="下架活动" width="400px">
+    <el-dialog v-model="dialog.visible" title="下架活动" width="420px">
       <el-form ref="dialogFormRef" :model="dialog" :rules="dialogRules">
         <el-form-item label="下架原因" prop="reason">
           <el-input
@@ -170,7 +180,7 @@ function resetQuery() {
   fetchList()
 }
 
-function viewDetail(id: string) {
+function viewDetail(_id: string) {
   ElMessage.info('详情页待实现')
 }
 
@@ -207,9 +217,49 @@ onMounted(fetchList)
 </script>
 
 <style scoped>
-h2 { margin-bottom: 16px; color: #333; }
-.search-card { margin-bottom: 16px; }
-.table-card { min-height: 400px; }
-.pagination-wrapper { margin-top: 16px; display: flex; justify-content: center; }
-.no-more { color: #999; font-size: 13px; }
+.page-container { max-width: 1200px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-title { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.page-desc { margin: 4px 0 0; color: var(--text-muted); font-size: 13px; }
+
+.search-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 0;
+}
+
+.table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 0;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.table-card :deep(.el-table) {
+  border: none;
+}
+
+.pagination-wrapper {
+  margin-top: 16px;
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.no-more { color: var(--text-muted); font-size: 13px; }
 </style>
