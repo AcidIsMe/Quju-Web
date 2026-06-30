@@ -28,7 +28,7 @@
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewDetail(row)">查看</el-button>
             <el-button type="success" link size="small" @click="handleApprove(row)">通过</el-button>
-            <el-button type="warning" link size="small" @click="handleRequestChanges(row)">要求修改</el-button>
+            <el-button type="warning" link size="small" @click="handleRequestChanges(row)">驳回修改</el-button>
             <el-button type="danger" link size="small" @click="handleReject(row)">驳回</el-button>
           </template>
         </el-table-column>
@@ -104,9 +104,9 @@ async function fetchList() {
       status: 'pending_manual_review',
       limit: 10,
     })
-    list.value = res.data.list
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = res.data
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -121,9 +121,9 @@ async function loadMore() {
       cursor: cursor.value,
       limit: 10,
     })
-    list.value = [...list.value, ...res.data.list]
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = [...list.value, ...res.data]
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -156,7 +156,7 @@ function handleRequestChanges(row: ActivityItem) {
   reviewDialog.visible = true
   reviewDialog.targetId = row.id
   reviewDialog.action = 'request_changes'
-  reviewDialog.title = '要求修改'
+  reviewDialog.title = '驳回并要求修改'
   reviewDialog.reason = ''
   reviewDialog.placeholder = '请填写修改意见'
 }
@@ -170,7 +170,7 @@ async function confirmReview() {
   try {
     await reviewActivity({
       id: reviewDialog.targetId,
-      action: reviewDialog.action,
+      action: reviewDialog.action === 'request_changes' ? 'reject' : reviewDialog.action,
       reason: reviewDialog.action !== 'approve' ? reviewDialog.reason : undefined,
     })
     ElMessage.success('审核完成')

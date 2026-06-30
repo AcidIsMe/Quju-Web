@@ -150,9 +150,9 @@ async function fetchList() {
     if (queryParams.q) params.q = queryParams.q
     if (queryParams.status) params.status = queryParams.status
     const res = await getActivityList(params)
-    list.value = res.data.list
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = res.data
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -166,9 +166,9 @@ async function loadMore() {
     if (queryParams.q) params.q = queryParams.q
     if (queryParams.status) params.status = queryParams.status
     const res = await getActivityList(params)
-    list.value = [...list.value, ...res.data.list]
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = [...list.value, ...res.data]
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
