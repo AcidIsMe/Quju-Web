@@ -42,8 +42,16 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
-        <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
+        <el-pagination
+          v-if="total > 0"
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="fetchList"
+          @size-change="fetchList"
+        />
       </div>
     </div>
 
@@ -72,7 +80,9 @@ import type { FormInstance } from 'element-plus'
 const loading = ref(false)
 const submitting = ref(false)
 const list = ref<MerchantItem[]>([])
-const hasMore = ref(false)
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 const rejectFormRef = ref<FormInstance>()
 const rejectDialog = reactive({
@@ -87,10 +97,9 @@ const rejectRules = {
 async function fetchList() {
   loading.value = true
   try {
-    const res = await getMerchantPendingList({ limit: 50 })
-    const dataList = Array.isArray(res.data) ? res.data : (res.data?.list || [])
-    list.value = dataList
-    hasMore.value = false
+    const res = await getMerchantPendingList({ page: currentPage.value, size: pageSize.value })
+    list.value = res.data
+    total.value = res.pagination?.total || 0
   } finally {
     loading.value = false
   }

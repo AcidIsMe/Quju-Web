@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { Pagination } from './types'
+import type { ApiResponse } from './types'
 
 export interface UserItem {
   id: string
@@ -25,20 +25,20 @@ export function getUserList(params: {
   q?: string
   role?: string
   status?: string
-  cursor?: string
-  limit?: number
+  page?: number
+  size?: number
 }) {
-  return request.get<{ list: UserItem[]; pagination: Pagination }>('/admin/users', { params })
+  return request.get<unknown, ApiResponse<UserItem[]>>('/admin/users', { params })
 }
 
 export function getUserDetail(id: string) {
-  return request.get<UserDetail>(`/admin/users/${id}`)
+  return request.get<unknown, ApiResponse<UserDetail>>(`/admin/users/${id}`)
 }
 
 export function banUser(id: string, data: { reason: string; expires_at?: string }) {
-  return request.post(`/admin/users/${id}/ban`, data)
+  return request.post<unknown, ApiResponse<void>>(`/admin/users/${id}/ban`, data)
 }
 
 export function unbanUser(id: string) {
-  return request.post(`/admin/users/${id}/unban`)
+  return request.post<unknown, ApiResponse<void>>(`/admin/users/${id}/unban`)
 }

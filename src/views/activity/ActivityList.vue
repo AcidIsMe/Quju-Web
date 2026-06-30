@@ -74,15 +74,52 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button
-          v-if="hasMore"
-          :loading="loading"
-          @click="loadMore"
-          round
-        >加载更多</el-button>
-        <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
+        <el-pagination
+          v-if="total > 0"
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="fetchList"
+          @size-change="fetchList"
+        />
       </div>
     </div>
+
+    <!-- 详情对话框 -->
+    <el-dialog v-model="detailVisible" title="活动详情" width="600px">
+      <template v-if="detailLoading">
+        <div class="detail-loading">加载中...</div>
+      </template>
+      <template v-else-if="detail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="活动ID" :span="2">{{ detail.id }}</el-descriptions-item>
+          <el-descriptions-item label="活动名称" :span="2">{{ detail.title }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="statusMap[detail.status]?.type" size="small" effect="plain" round>
+              {{ statusMap[detail.status]?.label || detail.status }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="活动类型">{{ detail.activity_type || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="开始时间">{{ detail.start_time || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="结束时间">{{ detail.end_time || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="报名截止">{{ detail.registration_deadline || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="人数">{{ detail.current_participants }}/{{ detail.max_participants }}</el-descriptions-item>
+          <el-descriptions-item label="发起人">{{ detail.creator?.nickname || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="信用分要求">{{ detail.min_credit_score ?? '-' }}</el-descriptions-item>
+          <el-descriptions-item label="活动地点" :span="2">{{ detail.location_name || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="标签" :span="2">
+            <el-tag v-for="tag in detail.tags" :key="tag" size="small" style="margin-right: 4px">{{ tag }}</el-tag>
+            <span v-if="!detail.tags?.length">-</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="活动描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="detail.review_reason" label="审核原因" :span="2">{{ detail.review_reason }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ detail.created_at || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="是否组队">{{ detail.is_team_activity ? '是' : '否' }}</el-descriptions-item>
+        </el-descriptions>
+      </template>
+    </el-dialog>
 
     <!-- 下架对话框 -->
     <el-dialog v-model="dialog.visible" title="下架活动" width="420px">
@@ -107,14 +144,16 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getActivityList, takeDownActivity, restoreActivity } from '@/api/modules/activity'
-import type { ActivityItem } from '@/api/modules/activity'
+import { getActivityList, getActivityDetail, takeDownActivity, restoreActivity } from '@/api/modules/activity'
+import type { ActivityItem, ActivityDetail } from '@/api/modules/activity'
 import type { FormInstance } from 'element-plus'
 
 const loading = ref(false)
 const submitting = ref(false)
 const list = ref<ActivityItem[]>([])
-const hasMore = ref(false)
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 const queryParams = reactive({
   q: '',
@@ -141,16 +180,19 @@ const dialogRules = {
   reason: [{ required: true, message: '请填写下架原因', trigger: 'blur' }],
 }
 
+const detailVisible = ref(false)
+const detailLoading = ref(false)
+const detail = ref<ActivityDetail | null>(null)
+
 async function fetchList() {
   loading.value = true
   try {
-    const params: any = { limit: 50 }
+    const params: any = { page: currentPage.value, size: pageSize.value }
     if (queryParams.q) params.q = queryParams.q
-    if (queryParams.status) params.status = params.status
+    if (queryParams.status) params.status = queryParams.status
     const res = await getActivityList(params)
-    const dataList = Array.isArray(res.data) ? res.data : (res.data?.list || [])
-    list.value = dataList
-    hasMore.value = false
+    list.value = res.data
+    total.value = res.pagination?.total || 0
   } finally {
     loading.value = false
   }
@@ -159,11 +201,23 @@ async function fetchList() {
 function resetQuery() {
   queryParams.q = ''
   queryParams.status = ''
+  currentPage.value = 1
   fetchList()
 }
 
-function viewDetail(_id: string) {
-  ElMessage.info('详情页待实现')
+async function viewDetail(id: string) {
+  detailVisible.value = true
+  detailLoading.value = true
+  detail.value = null
+  try {
+    const res = await getActivityDetail(id)
+    detail.value = res.data
+  } catch {
+    ElMessage.error('获取活动详情失败')
+    detailVisible.value = false
+  } finally {
+    detailLoading.value = false
+  }
 }
 
 function handleTakeDown(row: ActivityItem) {
@@ -244,4 +298,6 @@ onMounted(fetchList)
 }
 
 .no-more { color: var(--text-muted); font-size: 13px; }
+
+.detail-loading { text-align: center; padding: 40px 0; color: var(--text-muted); }
 </style>

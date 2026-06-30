@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { Pagination } from './types'
+import type { ApiResponse } from './types'
 
 export interface ActivityItem {
   id: string
@@ -31,10 +31,10 @@ export interface ActivityDetail extends ActivityItem {
 export function getActivityList(params: {
   q?: string
   status?: string
-  cursor?: string
-  limit?: number
+  page?: number
+  size?: number
 }) {
-  return request.get<{ list: ActivityItem[]; pagination: Pagination }>('/admin/activities', { params })
+  return request.get<unknown, ApiResponse<ActivityItem[]>>('/admin/activities', { params })
 }
 
 export function reviewActivity(data: {
@@ -42,16 +42,20 @@ export function reviewActivity(data: {
   action: 'approve' | 'reject' | 'request_changes'
   reason?: string
 }) {
-  return request.post(`/admin/activities/${data.id}/review`, {
+  return request.post<unknown, ApiResponse<ActivityItem>>(`/admin/activities/${data.id}/review`, {
     action: data.action,
     reason: data.reason,
   })
 }
 
 export function takeDownActivity(id: string, reason: string) {
-  return request.post(`/admin/activities/${id}/take-down`, { reason })
+  return request.post<unknown, ApiResponse<void>>(`/admin/activities/${id}/take-down`, { reason })
+}
+
+export function getActivityDetail(id: string) {
+  return request.get<unknown, ApiResponse<ActivityDetail>>(`/admin/activities/${id}`)
 }
 
 export function restoreActivity(id: string) {
-  return request.post(`/admin/activities/${id}/restore`)
+  return request.post<unknown, ApiResponse<void>>(`/admin/activities/${id}/restore`)
 }

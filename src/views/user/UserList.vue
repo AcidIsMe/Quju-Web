@@ -81,10 +81,54 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
-        <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
+        <el-pagination
+          v-if="total > 0"
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="fetchList"
+          @size-change="fetchList"
+        />
       </div>
     </div>
+
+    <!-- 详情对话框 -->
+    <el-dialog v-model="detailVisible" title="用户详情" width="560px">
+      <template v-if="detailLoading">
+        <div class="detail-loading">加载中...</div>
+      </template>
+      <template v-else-if="detail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="用户ID" :span="2">{{ detail.id }}</el-descriptions-item>
+          <el-descriptions-item label="昵称">{{ detail.nickname || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="邮箱">{{ detail.email || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="角色">
+            <el-tag v-if="detail.role === 'merchant'" type="warning" effect="plain" round size="small">商家</el-tag>
+            <el-tag v-else-if="detail.role === 'admin'" type="danger" effect="plain" round size="small">管理员</el-tag>
+            <el-tag v-else type="primary" effect="plain" round size="small">个人</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag
+              :type="detail.status === 'active' ? 'success' : detail.status === 'banned' ? 'danger' : 'warning'"
+              effect="plain" round size="small"
+            >
+              {{ detail.status === 'active' ? '正常' : detail.status === 'banned' ? '已封禁' : '待激活' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="信誉分">{{ detail.credit_score ?? '-' }}</el-descriptions-item>
+          <el-descriptions-item label="性别">{{ detail.gender || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="生日">{{ detail.birthday || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="个性签名" :span="2">{{ detail.bio || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="兴趣标签" :span="2">
+            <el-tag v-for="tag in detail.interest_tags" :key="tag" size="small" style="margin-right: 4px">{{ tag }}</el-tag>
+            <span v-if="!detail.interest_tags?.length">-</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="注册时间" :span="2">{{ detail.created_at || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </template>
+    </el-dialog>
 
     <!-- 封禁对话框 -->
     <el-dialog v-model="banDialog.visible" title="封禁用户" width="420px">
@@ -112,14 +156,16 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserList, banUser, unbanUser } from '@/api/modules/user'
-import type { UserItem } from '@/api/modules/user'
+import { getUserList, getUserDetail, banUser, unbanUser } from '@/api/modules/user'
+import type { UserItem, UserDetail } from '@/api/modules/user'
 import type { FormInstance } from 'element-plus'
 
 const loading = ref(false)
 const submitting = ref(false)
 const list = ref<UserItem[]>([])
-const hasMore = ref(false)
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 const queryParams = reactive({
   q: '',
@@ -138,17 +184,20 @@ const banRules = {
   reason: [{ required: true, message: '请填写封禁原因', trigger: 'blur' }],
 }
 
+const detailVisible = ref(false)
+const detailLoading = ref(false)
+const detail = ref<UserDetail | null>(null)
+
 async function fetchList() {
   loading.value = true
   try {
-    const params: any = { limit: 50 }
+    const params: any = { page: currentPage.value, size: pageSize.value }
     if (queryParams.q) params.q = queryParams.q
     if (queryParams.role) params.role = queryParams.role
     if (queryParams.status) params.status = queryParams.status
     const res = await getUserList(params)
-    const dataList = Array.isArray(res.data) ? res.data : (res.data?.list || [])
-    list.value = dataList
-    hasMore.value = false
+    list.value = res.data
+    total.value = res.pagination?.total || 0
   } finally {
     loading.value = false
   }
@@ -158,11 +207,23 @@ function resetQuery() {
   queryParams.q = ''
   queryParams.role = ''
   queryParams.status = ''
+  currentPage.value = 1
   fetchList()
 }
 
-function viewDetail(_row: UserItem) {
-  ElMessage.info('详情页待实现')
+async function viewDetail(row: UserItem) {
+  detailVisible.value = true
+  detailLoading.value = true
+  detail.value = null
+  try {
+    const res = await getUserDetail(row.id)
+    detail.value = res.data
+  } catch {
+    ElMessage.error('获取用户详情失败')
+    detailVisible.value = false
+  } finally {
+    detailLoading.value = false
+  }
 }
 
 function handleBan(row: UserItem) {
@@ -247,4 +308,6 @@ onMounted(fetchList)
 }
 
 .no-more { color: var(--text-muted); font-size: 13px; }
+
+.detail-loading { text-align: center; padding: 40px 0; color: var(--text-muted); }
 </style>

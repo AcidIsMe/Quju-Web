@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { Pagination } from './types'
+import type { ApiResponse } from './types'
 
 export interface MerchantItem {
   id: string
@@ -14,14 +14,14 @@ export interface MerchantItem {
   created_at: string
 }
 
-export function getMerchantPendingList(params: { cursor?: string; limit?: number }) {
-  return request.get<{ list: MerchantItem[]; pagination: Pagination }>('/admin/merchants/pending', { params })
+export function getMerchantPendingList(params: { page?: number; size?: number }) {
+  return request.get<unknown, ApiResponse<MerchantItem[]>>('/admin/merchants/pending', { params })
 }
 
 export function approveMerchant(id: string) {
-  return request.post(`/admin/merchants/${id}/approve`)
+  return request.post<unknown, ApiResponse<void>>(`/admin/merchants/${id}/approve`)
 }
 
 export function rejectMerchant(id: string, reason: string) {
-  return request.post(`/admin/merchants/${id}/reject`, { reason })
+  return request.post<unknown, ApiResponse<void>>(`/admin/merchants/${id}/reject`, { reason })
 }

@@ -28,15 +28,23 @@
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewDetail(row)">查看</el-button>
             <el-button type="success" link size="small" @click="handleApprove(row)">通过</el-button>
-            <el-button type="warning" link size="small" @click="handleRequestChanges(row)">要求修改</el-button>
+            <el-button type="warning" link size="small" @click="handleRequestChanges(row)">驳回修改</el-button>
             <el-button type="danger" link size="small" @click="handleReject(row)">驳回</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
-        <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
+        <el-pagination
+          v-if="total > 0"
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="fetchList"
+          @size-change="fetchList"
+        />
       </div>
     </div>
 
@@ -78,7 +86,9 @@ import type { FormInstance } from 'element-plus'
 const loading = ref(false)
 const submitting = ref(false)
 const list = ref<ActivityItem[]>([])
-const hasMore = ref(false)
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 const reviewFormRef = ref<FormInstance>()
 const reviewRules = {
@@ -100,11 +110,11 @@ async function fetchList() {
   try {
     const res = await getActivityList({
       status: 'pending_manual_review',
-      limit: 50,
+      page: currentPage.value,
+      size: pageSize.value,
     })
-    const dataList = Array.isArray(res.data) ? res.data : (res.data?.list || [])
-    list.value = dataList
-    hasMore.value = false
+    list.value = res.data
+    total.value = res.pagination?.total || 0
   } finally {
     loading.value = false
   }
@@ -137,7 +147,7 @@ function handleRequestChanges(row: ActivityItem) {
   reviewDialog.visible = true
   reviewDialog.targetId = row.id
   reviewDialog.action = 'request_changes'
-  reviewDialog.title = '要求修改'
+  reviewDialog.title = '驳回并要求修改'
   reviewDialog.reason = ''
   reviewDialog.placeholder = '请填写修改意见'
 }
@@ -151,7 +161,7 @@ async function confirmReview() {
   try {
     await reviewActivity({
       id: reviewDialog.targetId,
-      action: reviewDialog.action,
+      action: reviewDialog.action === 'request_changes' ? 'reject' : reviewDialog.action,
       reason: reviewDialog.action !== 'approve' ? reviewDialog.reason : undefined,
     })
     ElMessage.success('审核完成')
