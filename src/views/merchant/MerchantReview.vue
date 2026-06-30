@@ -90,9 +90,9 @@ async function fetchList() {
   cursor.value = undefined
   try {
     const res = await getMerchantPendingList({ limit: 10 })
-    list.value = res.data.list
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = res.data
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -103,9 +103,9 @@ async function loadMore() {
   loading.value = true
   try {
     const res = await getMerchantPendingList({ cursor: cursor.value, limit: 10 })
-    list.value = [...list.value, ...res.data.list]
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = [...list.value, ...res.data]
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
