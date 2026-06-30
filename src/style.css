@@ -1,0 +1,227 @@
+/* ===========================
+   趣聚平台 · 管理后台
+   活力清新主题
+   =========================== */
+
+:root {
+  /* Brand — 青蓝（从 logo 提取） */
+  --brand: oklch(0.60 0.18 225);
+  --brand-light: oklch(0.78 0.12 220);
+  --brand-lighter: oklch(0.90 0.06 215);
+  --brand-bg: oklch(0.96 0.03 210);
+
+  /* Accent — 暖色点缀（琥珀） */
+  --accent: oklch(0.72 0.15 70);
+  --accent-light: oklch(0.88 0.08 70);
+  --accent-bg: oklch(0.97 0.03 70);
+
+  /* Sidebar — 纯白清爽 */
+  --sidebar-bg: #ffffff;
+  --sidebar-text: oklch(0.45 0.02 250);
+  --sidebar-text-active: var(--brand);
+  --sidebar-hover-bg: oklch(0.96 0.03 220);
+  --sidebar-active-indicator: var(--brand);
+  --sidebar-border: oklch(0.92 0.01 240);
+
+  /* Surfaces */
+  --bg-page: oklch(0.975 0.005 240);
+  --bg-card: #ffffff;
+  --border-light: oklch(0.92 0.01 240);
+  --border-muted: oklch(0.95 0.01 240);
+
+  /* Text */
+  --text-primary: oklch(0.18 0.01 250);
+  --text-secondary: oklch(0.45 0.02 250);
+  --text-muted: oklch(0.62 0.02 250);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.06);
+  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.08);
+  --shadow-sidebar: 1px 0 8px oklch(0 0 0 / 0.05);
+
+  /* ========================================
+     Element Plus 变量覆盖
+     ======================================== */
+  --el-color-primary: var(--brand);
+  --el-color-primary-light-3: oklch(0.70 0.14 222);
+  --el-color-primary-light-5: oklch(0.82 0.08 218);
+  --el-color-primary-light-7: oklch(0.90 0.05 215);
+  --el-color-primary-light-8: oklch(0.94 0.03 212);
+  --el-color-primary-light-9: oklch(0.97 0.02 210);
+  --el-color-primary-dark-2: oklch(0.52 0.18 228);
+
+  --el-color-success: oklch(0.62 0.15 155);
+  --el-color-warning: oklch(0.72 0.14 75);
+  --el-color-danger: oklch(0.60 0.18 25);
+
+  --el-color-info: oklch(0.55 0.02 250);
+
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-color: var(--border-light);
+  --el-border-color-light: var(--border-muted);
+
+  --el-font-size-base: 14px;
+  --el-font-size-small: 12px;
+  --el-font-size-large: 16px;
+
+  --el-bg-color: var(--bg-page);
+  --el-bg-color-overlay: var(--bg-card);
+  --el-fill-color-light: oklch(0.97 0.01 240);
+  --el-fill-color-lighter: oklch(0.985 0.005 240);
+
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-secondary);
+  --el-text-color-placeholder: var(--text-muted);
+
+  /* Table */
+  --el-table-border-color: var(--border-muted);
+  --el-table-header-bg-color: oklch(0.975 0.008 240);
+  --el-table-row-hover-bg: oklch(0.96 0.02 235);
+
+  /* Menu */
+  --el-menu-active-color: var(--brand);
+  --el-menu-text-color: var(--sidebar-text);
+  --el-menu-hover-text-color: var(--sidebar-text-active);
+  --el-menu-hover-bg-color: var(--sidebar-hover-bg);
+}
+
+/* ========== RESET ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei',
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+  background: var(--bg-page);
+}
+
+#app {
+  height: 100%;
+}
+
+/* ========== BASE TRANSITIONS ========== */
+a, button, .el-button, .el-menu-item, .el-sub-menu__title,
+.el-card, .el-tag, .el-breadcrumb__inner {
+  transition: all 0.2s ease;
+}
+
+/* ========== CARD ========== */
+.el-card {
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.el-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ========== TABLE ========== */
+.el-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+  background: oklch(0.985 0.005 240);
+}
+
+.el-table th.el-table__cell {
+  background: var(--el-table-header-bg-color);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.el-table td.el-table__cell {
+  color: var(--text-primary);
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background: var(--el-table-row-hover-bg);
+}
+
+/* ========== DIALOG ========== */
+.el-dialog {
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+}
+
+.el-dialog__header {
+  padding: 22px 24px 0;
+  margin-right: 0;
+}
+
+.el-dialog__body {
+  padding: 16px 24px 20px;
+}
+
+.el-dialog__footer {
+  padding: 0 24px 20px;
+}
+
+.el-dialog__title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+/* ========== TAG ========== */
+.el-tag {
+  border: none;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* ========== BUTTON ========== */
+.el-button {
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.el-button--primary {
+  border: none;
+}
+
+.el-button--primary:hover {
+  filter: brightness(1.08);
+}
+
+/* ========== INPUT ========== */
+.el-input__wrapper {
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--border-light) inset;
+  transition: box-shadow 0.2s ease;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--el-color-primary-light-5) inset;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1.5px var(--el-color-primary) inset;
+}
+
+/* ========== SELECT ========== */
+.el-select .el-input__wrapper {
+  box-shadow: 0 0 0 1px var(--border-light) inset;
+}
+
+/* ========== DIVIDER ========== */
+.el-divider__text {
+  color: var(--text-muted);
+}
+
+/* ========== EMPTY ========== */
+.el-empty__description p {
+  color: var(--text-muted);
+}

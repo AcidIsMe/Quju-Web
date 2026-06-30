@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="92" stroke="#b2ebf2" stroke-width="4" fill="none" opacity="0.2"/>
+
+  <!-- 三个人形抽象 -->
+  <!-- 左人 -->
+  <g transform="translate(68, 56)" opacity="0.75">
+    <circle cx="0" cy="-10" r="11" stroke="#b2ebf2" stroke-width="3.5" fill="none"/>
+    <path d="M-17 25c0-11 7.5-17 17-17s17 6 17 17" stroke="#b2ebf2" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- 中人 -->
+  <g transform="translate(100, 50)" opacity="1">
+    <circle cx="0" cy="-10" r="13" stroke="#e0f7fa" stroke-width="3.5" fill="none"/>
+    <path d="M-19 29c0-13 8.5-19 19-19s19 6 19 19" stroke="#e0f7fa" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- 右人 -->
+  <g transform="translate(132, 56)" opacity="0.75">
+    <circle cx="0" cy="-10" r="11" stroke="#b2ebf2" stroke-width="3.5" fill="none"/>
+    <path d="M-17 25c0-11 7.5-17 17-17s17 6 17 17" stroke="#b2ebf2" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- 底部弧线 -->
+  <path d="M48 142 Q100 158 152 142" stroke="#b2ebf2" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.35"/>
+</svg>
