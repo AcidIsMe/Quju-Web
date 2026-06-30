@@ -35,8 +35,16 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
-        <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
+        <el-pagination
+          v-if="total > 0"
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="fetchList"
+          @size-change="fetchList"
+        />
       </div>
     </div>
 
@@ -78,8 +86,9 @@ import type { FormInstance } from 'element-plus'
 const loading = ref(false)
 const submitting = ref(false)
 const list = ref<ActivityItem[]>([])
-const cursor = ref<string | undefined>(undefined)
-const hasMore = ref(false)
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
 
 const reviewFormRef = ref<FormInstance>()
 const reviewRules = {
@@ -98,32 +107,14 @@ const reviewDialog = reactive({
 
 async function fetchList() {
   loading.value = true
-  cursor.value = undefined
   try {
     const res = await getActivityList({
       status: 'pending_manual_review',
-      limit: 10,
+      page: currentPage.value,
+      size: pageSize.value,
     })
     list.value = res.data
-    hasMore.value = res.pagination?.has_more || false
-    cursor.value = res.pagination?.next_cursor || undefined
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadMore() {
-  if (!hasMore.value || loading.value) return
-  loading.value = true
-  try {
-    const res = await getActivityList({
-      status: 'pending_manual_review',
-      cursor: cursor.value,
-      limit: 10,
-    })
-    list.value = [...list.value, ...res.data]
-    hasMore.value = res.pagination?.has_more || false
-    cursor.value = res.pagination?.next_cursor || undefined
+    total.value = res.pagination?.total || 0
   } finally {
     loading.value = false
   }

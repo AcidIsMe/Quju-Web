@@ -1,7 +1,7 @@
 export interface Pagination {
-  next_cursor: string | null
-  has_more: boolean
-  limit: number
+  total: number
+  page: number
+  size: number
 }
 
 export interface ApiResponse<T> {

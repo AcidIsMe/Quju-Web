@@ -25,8 +25,8 @@ export function getUserList(params: {
   q?: string
   role?: string
   status?: string
-  cursor?: string
-  limit?: number
+  page?: number
+  size?: number
 }) {
   return request.get<unknown, ApiResponse<UserItem[]>>('/admin/users', { params })
 }

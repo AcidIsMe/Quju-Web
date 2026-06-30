@@ -14,7 +14,7 @@ export interface MerchantItem {
   created_at: string
 }
 
-export function getMerchantPendingList(params: { cursor?: string; limit?: number }) {
+export function getMerchantPendingList(params: { page?: number; size?: number }) {
   return request.get<unknown, ApiResponse<MerchantItem[]>>('/admin/merchants/pending', { params })
 }
 

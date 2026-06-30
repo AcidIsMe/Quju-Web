@@ -31,8 +31,8 @@ export interface ActivityDetail extends ActivityItem {
 export function getActivityList(params: {
   q?: string
   status?: string
-  cursor?: string
-  limit?: number
+  page?: number
+  size?: number
 }) {
   return request.get<unknown, ApiResponse<ActivityItem[]>>('/admin/activities', { params })
 }
@@ -50,6 +50,10 @@ export function reviewActivity(data: {
 
 export function takeDownActivity(id: string, reason: string) {
   return request.post<unknown, ApiResponse<void>>(`/admin/activities/${id}/take-down`, { reason })
+}
+
+export function getActivityDetail(id: string) {
+  return request.get<unknown, ApiResponse<ActivityDetail>>(`/admin/activities/${id}`)
 }
 
 export function restoreActivity(id: string) {
