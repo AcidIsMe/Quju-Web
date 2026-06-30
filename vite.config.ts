@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const backendUrl = env.VITE_API_TARGET || 'http://localhost:3000'
+  const backendUrl = env.VITE_API_TARGET || 'http://localhost:8080'
 
   return {
     plugins: [vue()],
@@ -14,8 +14,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      host: '0.0.0.0',
-      port: 5173,
+      port: 3000,
       proxy: {
         '/api': {
           target: backendUrl,
