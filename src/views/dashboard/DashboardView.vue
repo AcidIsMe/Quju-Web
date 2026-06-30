@@ -83,6 +83,7 @@
               <el-icon><Shop /></el-icon>
             </div>
             <span>商家审核</span>
+            <el-tag v-if="stats.pendingMerchants > 0" size="small" type="danger" class="qa-badge">{{ stats.pendingMerchants }}</el-tag>
           </div>
           <div class="quick-action-item" @click="goToActivityList">
             <div class="qa-icon" style="background: oklch(0.94 0.05 155 / 0.3); color: oklch(0.62 0.15 155);">
@@ -106,6 +107,9 @@
 import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { UserFilled, Calendar, EditPen, Shop, Refresh, Top, Bottom, Lightning, List } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { getDashboardOverview } from '@/api/modules/dashboard'
+import type { DashboardActivity } from '@/api/modules/dashboard'
 
 const router = useRouter()
 const loading = ref(false)
@@ -115,6 +119,7 @@ const stats = reactive({
   activities: 0,
   pendingReviews: 0,
   merchants: 0,
+  pendingMerchants: 0,
 })
 
 const statCards = computed(() => [
@@ -123,28 +128,28 @@ const statCards = computed(() => [
     label: '用户总数',
     value: stats.users,
     color: 'oklch(0.58 0.12 300)',
-    trend: 12,
+    trend: null as number | null,
   },
   {
     icon: Calendar,
     label: '活动总数',
     value: stats.activities,
     color: 'oklch(0.62 0.18 225)',
-    trend: 8,
+    trend: null as number | null,
   },
   {
     icon: EditPen,
     label: '待审核活动',
     value: stats.pendingReviews,
     color: 'oklch(0.72 0.14 75)',
-    trend: -5,
+    trend: null as number | null,
   },
   {
     icon: Shop,
     label: '商家总数',
     value: stats.merchants,
     color: 'oklch(0.62 0.15 155)',
-    trend: 15,
+    trend: null as number | null,
   },
 ])
 
@@ -158,29 +163,47 @@ interface RecentActivity {
 
 const recentActivities = ref<RecentActivity[]>([])
 
-function loadDemoData() {
-  stats.users = 128
-  stats.activities = 45
-  stats.pendingReviews = 6
-  stats.merchants = 18
-
-  recentActivities.value = [
-    { title: '周末奥森徒步', statusType: 'success', statusLabel: '已发布', createdBy: '张三', createdAt: '2026-06-28 14:30' },
-    { title: '周三桌游之夜', statusType: 'warning', statusLabel: '待审核', createdBy: '李四', createdAt: '2026-06-28 11:20' },
-    { title: '城市骑行挑战', statusType: 'danger', statusLabel: '已驳回', createdBy: '王五', createdAt: '2026-06-27 16:45' },
-    { title: '周末羽毛球', statusType: 'success', statusLabel: '已发布', createdBy: '赵六', createdAt: '2026-06-27 09:10' },
-    { title: '摄影技巧分享会', statusType: 'warning', statusLabel: '待审核', createdBy: '钱七', createdAt: '2026-06-26 20:00' },
-  ]
-}
-
 async function refresh() {
   loading.value = true
   try {
-    loadDemoData()
-    await new Promise(r => setTimeout(r, 400))
+    const res = await getDashboardOverview()
+    stats.users = res.data.stats.users
+    stats.activities = res.data.stats.activities
+    stats.pendingReviews = res.data.stats.pending_reviews
+    stats.merchants = res.data.stats.merchants
+    stats.pendingMerchants = res.data.stats.pending_merchants
+    recentActivities.value = res.data.recent_activities.map(toRecentActivity)
+  } catch {
+    ElMessage.error('首页数据加载失败')
   } finally {
     loading.value = false
   }
+}
+
+function toRecentActivity(activity: DashboardActivity): RecentActivity {
+  const status = statusMap[activity.status] || { statusType: 'info', statusLabel: activity.status || '未知' }
+  return {
+    title: activity.title,
+    statusType: status.statusType,
+    statusLabel: status.statusLabel,
+    createdBy: activity.creator?.nickname || '未知',
+    createdAt: formatDateTime(activity.created_at),
+  }
+}
+
+const statusMap: Record<string, { statusType: string; statusLabel: string }> = {
+  draft: { statusType: 'info', statusLabel: '草稿' },
+  pending_ai_review: { statusType: 'warning', statusLabel: 'AI审核中' },
+  pending_manual_review: { statusType: 'warning', statusLabel: '待审核' },
+  published: { statusType: 'success', statusLabel: '已发布' },
+  rejected: { statusType: 'danger', statusLabel: '已驳回' },
+  taken_down: { statusType: 'info', statusLabel: '已下架' },
+  ended: { statusType: 'info', statusLabel: '已结束' },
+}
+
+function formatDateTime(value: string) {
+  if (!value) return ''
+  return value.replace('T', ' ').slice(0, 16)
 }
 
 function goToReview() { router.push('/activities/review') }
