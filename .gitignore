@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Project docs (not part of source)
+CLAUDE.md
+API与数据库设计.md

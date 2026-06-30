@@ -1,8 +1,16 @@
 <template>
-  <div>
-    <h2>用户管理</h2>
-    <el-card class="search-card">
-      <el-form :inline="true" :model="queryParams">
+  <div class="page-container">
+    <!-- 页头 -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">用户管理</h2>
+        <p class="page-desc">查看和管理平台用户，封禁或解封用户账户</p>
+      </div>
+    </div>
+
+    <!-- 搜索 -->
+    <div class="search-card">
+      <el-form :inline="true" :model="queryParams" class="search-form">
         <el-form-item label="搜索">
           <el-input v-model="queryParams.q" placeholder="邮箱或昵称" clearable />
         </el-form-item>
@@ -24,25 +32,26 @@
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
-    <el-card class="table-card">
+    <!-- 表格 -->
+    <div class="table-card">
       <el-table :data="list" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="200" show-overflow-tooltip />
         <el-table-column prop="nickname" label="昵称" width="130" />
         <el-table-column prop="email" label="邮箱" min-width="200" />
         <el-table-column label="类型" width="90">
           <template #default="{ row }">
-            <el-tag v-if="row.role === 'merchant'" type="warning" size="small">商家</el-tag>
-            <el-tag v-else-if="row.role === 'admin'" type="danger" size="small">管理员</el-tag>
-            <el-tag v-else type="primary" size="small">个人</el-tag>
+            <el-tag v-if="row.role === 'merchant'" type="warning" effect="plain" round size="small">商家</el-tag>
+            <el-tag v-else-if="row.role === 'admin'" type="danger" effect="plain" round size="small">管理员</el-tag>
+            <el-tag v-else type="primary" effect="plain" round size="small">个人</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'active' ? 'success' : row.status === 'banned' ? 'danger' : 'warning'"
-              size="small"
+              effect="plain" round size="small"
             >
               {{ row.status === 'active' ? '正常' : row.status === 'banned' ? '已封禁' : '待激活' }}
             </el-tag>
@@ -72,11 +81,12 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore">加载更多</el-button>
+        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
         <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
       </div>
-    </el-card>
+    </div>
 
+    <!-- 封禁对话框 -->
     <el-dialog v-model="banDialog.visible" title="封禁用户" width="420px">
       <el-form ref="banFormRef" :model="banDialog" :rules="banRules">
         <el-form-item label="封禁原因" prop="reason">
@@ -138,9 +148,9 @@ async function fetchList() {
     if (queryParams.role) params.role = queryParams.role
     if (queryParams.status) params.status = queryParams.status
     const res = await getUserList(params)
-    list.value = res.data.list
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = res.data
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -155,9 +165,9 @@ async function loadMore() {
     if (queryParams.role) params.role = queryParams.role
     if (queryParams.status) params.status = queryParams.status
     const res = await getUserList(params)
-    list.value = [...list.value, ...res.data.list]
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = [...list.value, ...res.data]
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -170,7 +180,7 @@ function resetQuery() {
   fetchList()
 }
 
-function viewDetail(row: UserItem) {
+function viewDetail(_row: UserItem) {
   ElMessage.info('详情页待实现')
 }
 
@@ -214,9 +224,46 @@ onMounted(fetchList)
 </script>
 
 <style scoped>
-h2 { margin-bottom: 16px; color: #333; }
-.search-card { margin-bottom: 16px; }
-.table-card { min-height: 400px; }
-.pagination-wrapper { margin-top: 16px; display: flex; justify-content: center; }
-.no-more { color: #999; font-size: 13px; }
+.page-container { max-width: 1200px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-title { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.page-desc { margin: 4px 0 0; color: var(--text-muted); font-size: 13px; }
+
+.search-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-bottom: 0;
+}
+
+.table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.table-card :deep(.el-table) { border: none; }
+
+.pagination-wrapper {
+  margin-top: 16px;
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.no-more { color: var(--text-muted); font-size: 13px; }
 </style>

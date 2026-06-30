@@ -1,7 +1,15 @@
 <template>
-  <div>
-    <h2>商家审核</h2>
-    <el-card class="table-card">
+  <div class="page-container">
+    <!-- 页头 -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">商家审核</h2>
+        <p class="page-desc">审核商家入驻申请，通过或驳回商家资质</p>
+      </div>
+    </div>
+
+    <!-- 表格 -->
+    <div class="table-card">
       <el-table :data="list" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="200" show-overflow-tooltip />
         <el-table-column prop="merchant_name" label="商家名称" min-width="160" />
@@ -15,7 +23,8 @@
         </el-table-column>
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
-            <el-tag :type="row.audit_status === 'pending' ? 'warning' : row.audit_status === 'approved' ? 'success' : 'danger'" size="small">
+            <el-tag :type="row.audit_status === 'pending' ? 'warning' : row.audit_status === 'approved' ? 'success' : 'danger'"
+              effect="plain" round size="small">
               {{ row.audit_status === 'pending' ? '待审核' : row.audit_status === 'approved' ? '已通过' : '已驳回' }}
             </el-tag>
           </template>
@@ -27,17 +36,18 @@
               <el-button type="success" link size="small" @click="handleApprove(row)">通过</el-button>
               <el-button type="danger" link size="small" @click="handleReject(row)">驳回</el-button>
             </template>
-            <span v-else style="color: #999; font-size: 12px;">已处理</span>
+            <span v-else class="handled-label">已处理</span>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore">加载更多</el-button>
+        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
         <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
       </div>
-    </el-card>
+    </div>
 
+    <!-- 驳回对话框 -->
     <el-dialog v-model="rejectDialog.visible" title="驳回商家申请" width="420px">
       <el-form ref="rejectFormRef" :model="rejectDialog" :rules="rejectRules">
         <el-form-item label="驳回原因" prop="reason">
@@ -80,9 +90,9 @@ async function fetchList() {
   cursor.value = undefined
   try {
     const res = await getMerchantPendingList({ limit: 10 })
-    list.value = res.data.list
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = res.data
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -93,9 +103,9 @@ async function loadMore() {
   loading.value = true
   try {
     const res = await getMerchantPendingList({ cursor: cursor.value, limit: 10 })
-    list.value = [...list.value, ...res.data.list]
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = [...list.value, ...res.data]
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -137,8 +147,36 @@ onMounted(fetchList)
 </script>
 
 <style scoped>
-h2 { margin-bottom: 16px; color: #333; }
-.table-card { min-height: 400px; }
-.pagination-wrapper { margin-top: 16px; display: flex; justify-content: center; }
-.no-more { color: #999; font-size: 13px; }
+.page-container { max-width: 1200px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-title { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.page-desc { margin: 4px 0 0; color: var(--text-muted); font-size: 13px; }
+
+.table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.table-card :deep(.el-table) { border: none; }
+
+.pagination-wrapper {
+  margin-top: 16px;
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.no-more { color: var(--text-muted); font-size: 13px; }
+
+.handled-label { color: var(--text-muted); font-size: 12px; }
 </style>

@@ -1,13 +1,21 @@
 <template>
-  <div>
-    <h2>活动审核</h2>
-    <el-card class="table-card">
+  <div class="page-container">
+    <!-- 页头 -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">活动审核</h2>
+        <p class="page-desc">审核用户提交的活动，通过、驳回或要求修改</p>
+      </div>
+    </div>
+
+    <!-- 表格 -->
+    <div class="table-card">
       <el-table :data="list" v-loading="loading" stripe>
         <el-table-column prop="id" label="ID" width="200" show-overflow-tooltip />
         <el-table-column prop="title" label="活动名称" min-width="180" show-overflow-tooltip />
         <el-table-column label="状态" width="110">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'pending_ai_review' ? 'warning' : 'warning'" size="small">
+            <el-tag type="warning" effect="plain" round size="small">
               {{ row.status === 'pending_ai_review' ? 'AI审核中' : '待人工审核' }}
             </el-tag>
           </template>
@@ -16,26 +24,26 @@
           <template #default="{ row }">{{ row.creator?.nickname }}</template>
         </el-table-column>
         <el-table-column prop="created_at" label="提交时间" width="170" />
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewDetail(row)">查看</el-button>
             <el-button type="success" link size="small" @click="handleApprove(row)">通过</el-button>
-            <el-button type="warning" link size="small" @click="handleRequestChanges(row)">要求修改</el-button>
+            <el-button type="warning" link size="small" @click="handleRequestChanges(row)">驳回修改</el-button>
             <el-button type="danger" link size="small" @click="handleReject(row)">驳回</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-button v-if="hasMore" :loading="loading" @click="loadMore">加载更多</el-button>
+        <el-button v-if="hasMore" :loading="loading" @click="loadMore" round>加载更多</el-button>
         <span v-else-if="list.length > 0" class="no-more">没有更多了</span>
       </div>
-    </el-card>
+    </div>
 
     <!-- 审核对话框 -->
     <el-dialog v-model="reviewDialog.visible" :title="reviewDialog.title" width="500px">
       <div v-if="reviewDialog.activity" class="review-info">
-        <h4>{{ reviewDialog.activity.title }}</h4>
+        <h4 class="review-activity-title">{{ reviewDialog.activity.title }}</h4>
         <p class="review-desc">{{ reviewDialog.activity.description }}</p>
       </div>
       <el-form ref="reviewFormRef" :model="reviewDialog" :rules="reviewRules">
@@ -96,9 +104,9 @@ async function fetchList() {
       status: 'pending_manual_review',
       limit: 10,
     })
-    list.value = res.data.list
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = res.data
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -113,9 +121,9 @@ async function loadMore() {
       cursor: cursor.value,
       limit: 10,
     })
-    list.value = [...list.value, ...res.data.list]
-    hasMore.value = res.data.pagination.has_more
-    cursor.value = res.data.pagination.next_cursor || undefined
+    list.value = [...list.value, ...res.data]
+    hasMore.value = res.pagination?.has_more || false
+    cursor.value = res.pagination?.next_cursor || undefined
   } finally {
     loading.value = false
   }
@@ -148,7 +156,7 @@ function handleRequestChanges(row: ActivityItem) {
   reviewDialog.visible = true
   reviewDialog.targetId = row.id
   reviewDialog.action = 'request_changes'
-  reviewDialog.title = '要求修改'
+  reviewDialog.title = '驳回并要求修改'
   reviewDialog.reason = ''
   reviewDialog.placeholder = '请填写修改意见'
 }
@@ -162,7 +170,7 @@ async function confirmReview() {
   try {
     await reviewActivity({
       id: reviewDialog.targetId,
-      action: reviewDialog.action,
+      action: reviewDialog.action === 'request_changes' ? 'reject' : reviewDialog.action,
       reason: reviewDialog.action !== 'approve' ? reviewDialog.reason : undefined,
     })
     ElMessage.success('审核完成')
@@ -177,11 +185,45 @@ onMounted(fetchList)
 </script>
 
 <style scoped>
-h2 { margin-bottom: 16px; color: #333; }
-.table-card { min-height: 400px; }
-.pagination-wrapper { margin-top: 16px; display: flex; justify-content: center; }
-.no-more { color: #999; font-size: 13px; }
-.review-info { margin-bottom: 16px; padding: 12px; background: #f5f7fa; border-radius: 6px; }
-.review-info h4 { margin: 0 0 8px; color: #333; }
-.review-desc { font-size: 13px; color: #666; margin: 0; }
+.page-container { max-width: 1200px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.page-title { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.page-desc { margin: 4px 0 0; color: var(--text-muted); font-size: 13px; }
+
+.table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.table-card :deep(.el-table) { border: none; }
+
+.pagination-wrapper {
+  margin-top: 16px;
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.no-more { color: var(--text-muted); font-size: 13px; }
+
+.review-info {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: oklch(0.98 0.005 240);
+  border-radius: 8px;
+  border: 1px solid var(--border-muted);
+}
+
+.review-activity-title { margin: 0 0 8px; color: var(--text-primary); font-size: 15px; }
+.review-desc { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
 </style>
