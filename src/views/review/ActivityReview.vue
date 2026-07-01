@@ -73,14 +73,47 @@
         >确认</el-button>
       </template>
     </el-dialog>
+
+    <!-- 详情对话框 -->
+    <el-dialog v-model="detailVisible" title="活动详情" width="600px">
+      <template v-if="detailLoading">
+        <div class="detail-loading">加载中...</div>
+      </template>
+      <template v-else-if="detail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="活动ID" :span="2">{{ detail.id }}</el-descriptions-item>
+          <el-descriptions-item label="活动名称" :span="2">{{ detail.title }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag type="warning" size="small" effect="plain" round>
+              {{ detail.status === 'pending_ai_review' ? 'AI审核中' : '待人工审核' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="活动类型">{{ detail.activity_type || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="开始时间">{{ detail.start_time || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="结束时间">{{ detail.end_time || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="报名截止">{{ detail.registration_deadline || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="人数">{{ detail.current_participants }}/{{ detail.max_participants }}</el-descriptions-item>
+          <el-descriptions-item label="发起人">{{ detail.creator?.nickname || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="信用分要求">{{ detail.min_credit_score ?? '-' }}</el-descriptions-item>
+          <el-descriptions-item label="活动地点" :span="2">{{ detail.location_name || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="标签" :span="2">
+            <el-tag v-for="tag in detail.tags" :key="tag" size="small" style="margin-right: 4px">{{ tag }}</el-tag>
+            <span v-if="!detail.tags?.length">-</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="活动描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
+          <el-descriptions-item v-if="detail.review_reason" label="审核原因" :span="2">{{ detail.review_reason }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ detail.created_at || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getActivityList, reviewActivity } from '@/api/modules/activity'
-import type { ActivityItem } from '@/api/modules/activity'
+import { getActivityList, getActivityDetail, reviewActivity } from '@/api/modules/activity'
+import type { ActivityItem, ActivityDetail } from '@/api/modules/activity'
 import type { FormInstance } from 'element-plus'
 
 const loading = ref(false)
@@ -105,6 +138,10 @@ const reviewDialog = reactive({
   targetId: '',
 })
 
+const detailVisible = ref(false)
+const detailLoading = ref(false)
+const detail = ref<ActivityDetail | null>(null)
+
 async function fetchList() {
   loading.value = true
   try {
@@ -120,9 +157,19 @@ async function fetchList() {
   }
 }
 
-function viewDetail(row: ActivityItem) {
-  reviewDialog.activity = row
-  ElMessage.info('详情查看待实现')
+async function viewDetail(row: ActivityItem) {
+  detailVisible.value = true
+  detailLoading.value = true
+  detail.value = null
+  try {
+    const res = await getActivityDetail(row.id)
+    detail.value = res.data
+  } catch {
+    ElMessage.error('获取活动详情失败')
+    detailVisible.value = false
+  } finally {
+    detailLoading.value = false
+  }
 }
 
 function handleApprove(row: ActivityItem) {
@@ -217,4 +264,5 @@ onMounted(fetchList)
 
 .review-activity-title { margin: 0 0 8px; color: var(--text-primary); font-size: 15px; }
 .review-desc { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+.detail-loading { text-align: center; padding: 40px 0; color: var(--text-muted); }
 </style>
