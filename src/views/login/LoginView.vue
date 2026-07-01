@@ -89,13 +89,7 @@
           <span class="divider-line"></span>
         </div>
 
-        <el-button size="large" @click="handleDemoLogin" class="demo-btn">
-          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" style="margin-right: 6px;">
-            <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
-          </svg>
-          演示模式 · 直接进入后台
-        </el-button>
-
+      
         <p class="footer-note">仅管理员可登录</p>
       </div>
     </div>

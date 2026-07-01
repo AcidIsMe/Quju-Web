@@ -48,3 +48,7 @@ export function refreshToken(refreshToken: string) {
     { refresh_token: refreshToken },
   )
 }
+
+export function changePassword(data: { old_password: string; new_password: string }) {
+  return request.put('/auth/password', data)
+}
